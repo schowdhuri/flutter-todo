@@ -4,9 +4,9 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TodoModel {
-  final int id;
-  final String name;
-  final bool isComplete;
+  int id;
+  String name;
+  bool isComplete;
 
   TodoModel({
     this.id,
@@ -18,7 +18,7 @@ class TodoModel {
     return {
       "id": this.id,
       "name": this.name,
-      "isComplete": this.isComplete ? 1 : 0,
+      "iscomplete": this.isComplete ? 1 : 0,
     };
   }
 }
@@ -41,9 +41,29 @@ class DAO {
     );
   }
 
-  addTodo(TodoModel todo) async {
+  Future<int> addTodo(TodoModel todo) async {
     final Database db = await database;
-    await db.insert("todo", todo.toMap());
+    return await db.insert("todo", todo.toMap());
+  }
+
+  Future<int> saveTodo(TodoModel todo) async {
+    final Database db = await database;
+    return await db.update(
+      "todo",
+      todo.toMap(),
+      where: "id=?",
+      whereArgs: [todo.id],
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  removeTodo(TodoModel todo) async {
+    final Database db = await database;
+    await db.delete(
+      "todo",
+      where: "id=?",
+      whereArgs: [todo.id],
+    );
   }
 
   Future<List<TodoModel>> findTodos() async {
@@ -53,7 +73,7 @@ class DAO {
       return TodoModel(
         id: rows[index]["id"],
         name: rows[index]["name"],
-        isComplete: rows[index]["iscomplete"] == "1" ? true : false,
+        isComplete: rows[index]["iscomplete"] == 1 ? true : false,
       );
     });
   }

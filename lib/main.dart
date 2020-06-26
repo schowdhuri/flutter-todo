@@ -17,27 +17,48 @@ class _TodoAppState extends State<TodoApp> {
   List<TodoModel> _todos = [];
   Future<List<TodoModel>> _futureTodos;
 
-  addTodo(String todo) async {
-    final TodoModel todoModel = TodoModel(name: todo, isComplete: false);
-    await dao.addTodo(todoModel);
+  Future<void> fetchTodos() async {
+    await dao.connect();
+    List<TodoModel> todos = await dao.findTodos();
     setState(() {
-//      _todos.insert(0, todo);
+      _todos = todos;
     });
   }
 
-  Widget getTodoRow(BuildContext ctx, int index) {
-    return TodoItem(_todos[index].name, key: new Key("$_todos[index].id"));
+  addTodo(String todo) async {
+    final TodoModel todoModel = TodoModel(name: todo, isComplete: false);
+    int todoId = await dao.addTodo(todoModel);
+    todoModel.id = todoId;
+    setState(() {
+      _todos.insert(0, todoModel);
+    });
   }
 
-  Future<List<TodoModel>> fetchTodos() async {
-    await dao.connect();
-    return dao.findTodos();
+  removeTodo(TodoModel todo) async {
+    await dao.removeTodo(todo);
+    setState(() {
+      _todos.remove(todo);
+    });
+  }
+
+  toggleTodo(TodoModel todo) async {
+    todo.isComplete = !todo.isComplete;
+    await dao.saveTodo(todo);
+    setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    _futureTodos = fetchTodos();
+    fetchTodos();
+  }
+
+  Widget buildTodoRow(BuildContext ctx, int index) {
+    return TodoItem(
+      _todos[index],
+      onDelete: removeTodo,
+      onToggle: toggleTodo,
+    );
   }
 
   @override
@@ -57,27 +78,12 @@ class _TodoAppState extends State<TodoApp> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   NewTodo(addTodo),
-                  FutureBuilder<List<TodoModel>>(
-                    future: _futureTodos,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        updateTodos(snapshot.data);
-                        return Expanded(
-                          flex: 1,
-                          child: ListView.builder(
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (ctx, index) {
-                              return TodoItem(snapshot.data[index].name,
-                                  key: new Key("$snapshot.data[index].id"));
-                            },
-                          ),
-                        );
-                      } else if (snapshot.hasError) {
-                        return Text("${snapshot.error}");
-                      }
-                      // By default, show a loading spinner.
-                      return CircularProgressIndicator();
-                    },
+                  Expanded(
+                    flex: 1,
+                    child: ListView.builder(
+                      itemCount: _todos.length,
+                      itemBuilder: buildTodoRow,
+                    ),
                   ),
                 ]),
           ),

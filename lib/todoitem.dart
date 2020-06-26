@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:todoapp/data.dart';
 
 class TodoItem extends StatefulWidget {
-  TodoItem(this.title, {Key key}) : super(key: key);
-  final String title;
+  TodoItem(this.todo, {this.onDelete, this.onToggle})
+      : super(key: Key("${todo.id}"));
+  final TodoModel todo;
+  final onDelete;
+  final onToggle;
 
   @override
-  _TodoItemState createState() => _TodoItemState(title);
+  _TodoItemState createState() => _TodoItemState(
+        todo,
+        onDelete: onDelete,
+        onToggle: onToggle,
+      );
 }
 
 class _TodoItemState extends State<TodoItem> {
-  _TodoItemState(this.title) : super();
+  final TodoModel todo;
+  final onDelete;
+  final onToggle;
 
-  final String title;
-  bool _isComplete = false;
+  _TodoItemState(this.todo, {this.onDelete, this.onToggle}) : super();
 
-  toggle() {
-    setState(() {
-      _isComplete = !_isComplete;
-    });
+  handleDelete() {
+    onDelete(todo);
+  }
+
+  handleToggle() {
+    onToggle(todo);
   }
 
   @override
@@ -28,13 +39,18 @@ class _TodoItemState extends State<TodoItem> {
           leading: Checkbox(
             checkColor: Colors.white,
             activeColor: Colors.lightGreen[500],
-            value: _isComplete,
+            value: todo.isComplete,
             onChanged: (val) {},
           ),
-          title: Text(title),
+          title: Text(todo.name),
+          trailing: IconButton(
+            color: Colors.red[700],
+            icon: Icon(Icons.delete_outline),
+            onPressed: handleDelete,
+          ),
         ),
       ),
-      onTap: toggle,
+      onTap: handleToggle,
     );
   }
 }
