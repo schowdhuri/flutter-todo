@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:todoapp/data.dart';
 
@@ -42,7 +43,16 @@ class _TodoItemState extends State<TodoItem> {
             value: todo.isComplete,
             onChanged: (val) {},
           ),
-          title: Text(todo.name),
+          title: Text(
+            todo.name,
+            style: todo.isComplete
+                ? TextStyle(
+                    color: Colors.blueGrey,
+                    fontStyle: FontStyle.italic,
+                    decoration: TextDecoration.lineThrough,
+                  )
+                : null,
+          ),
           trailing: IconButton(
             color: Colors.red[700],
             icon: Icon(Icons.delete_outline),

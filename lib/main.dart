@@ -64,11 +64,11 @@ class _TodoAppState extends State<TodoApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: "Todo App",
+        title: "Todo",
         home: Scaffold(
           appBar: AppBar(
             title: Text(
-              "Todo App",
+              "Todo",
               style: TextStyle(color: Colors.white),
             ),
             backgroundColor: Colors.lightGreen[700],
