@@ -53,9 +53,20 @@ class _TodoAppState extends State<TodoApp> {
     fetchTodos();
   }
 
-  Widget buildTodoRow(BuildContext ctx, int index) {
+  void reorderTodos(int oldIndex, int newIndex) {
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+    setState(() {
+      final TodoModel item = _todos.removeAt(oldIndex);
+      _todos.insert(newIndex, item);
+    });
+  }
+
+  Widget buildTodoRow(int index) {
     return TodoItem(
       _todos[index],
+      key: Key("${_todos[index].id}"),
       onDelete: removeTodo,
       onToggle: toggleTodo,
     );
@@ -80,9 +91,10 @@ class _TodoAppState extends State<TodoApp> {
                   NewTodo(addTodo),
                   Expanded(
                     flex: 1,
-                    child: ListView.builder(
-                      itemCount: _todos.length,
-                      itemBuilder: buildTodoRow,
+                    child: ReorderableListView(
+                      scrollDirection: Axis.vertical,
+                      onReorder: reorderTodos,
+                      children: List.generate(_todos.length, buildTodoRow),
                     ),
                   ),
                 ]),
