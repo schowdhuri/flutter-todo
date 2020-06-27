@@ -40,10 +40,12 @@ class _TodoItemState extends State<TodoItem> {
           checkColor: Colors.white,
           activeColor: Colors.lightGreen[500],
           value: todo.isComplete,
-          onChanged: (val) {},
+          onChanged: (val) {
+            handleToggle();
+          },
         ),
         title: Text(
-          "#${todo.id} ${todo.name}",
+          todo.name,
           style: todo.isComplete
               ? TextStyle(
                   color: Colors.blueGrey,
